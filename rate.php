@@ -3,7 +3,7 @@
 function get_json($url)
 {
     $response = '';
-    if ( function_exists( 'curl_version' ) ) {
+    if ( function_exists( 'curl_version' ) && function_exists( 'curl_init' ) ) {
         $curl = curl_init( $url );
         curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
         $response = curl_exec( $curl );

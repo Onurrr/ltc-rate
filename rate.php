@@ -3,7 +3,7 @@
 function get_json($url)
 {
     $response = '';
-    if ( function_exists( 'curl_version' ) ) {
+    if ( function_exists( 'curl_version' ) && function_exists( 'curl_init' ) ) {
         $curl = curl_init( $url );
         curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
         $response = curl_exec( $curl );
@@ -36,6 +36,33 @@ function get_ltc_usd_rate_from_litecoin_com()
     return $rate;
 }
 
+function get_ltc_usd_rate_from_bitstamp_net()
+{
+    $currency_to = "usd";
+    $url = "https://www.bitstamp.net/api/v2/ticker/ltc". $currency_to;
+    $prices = get_json($url);
+    $rate = ( isset( $prices->last ) ) ? floatval( $prices->last ) : 0.0;
+    return $rate;
+}
+
+function get_ltc_usd_rate_from_gdax()
+{
+    $currency_to = "usd";
+    $url = "https://api.coinbase.com/v2/prices/ltc-" . $currency_to . "/spot";
+    $prices = get_json($url)->data;
+    $rate = ( isset( $prices->amount ) ) ? floatval( $prices->amount ) : 0.0;
+    return $rate;
+}
+
+function get_ltc_usd_rate_from_fiat2ltc_com()
+{
+    $currency_to = "usd";
+    $url = "https://fiat2ltc.com/API/" . $currency_to;
+    $prices = get_json($url);
+    $rate = ( isset( $prices->index ) ) ? floatval( $prices->index ) : 0.0;
+    return $rate;
+}
+
 function get_ltc_usd_rate()
 {
     $rate = get_ltc_usd_from_cryptonator();
@@ -43,6 +70,18 @@ function get_ltc_usd_rate()
         return $rate;
 
     $rate = get_ltc_usd_rate_from_litecoin_com();
+    if($rate != 0.0)
+        return $rate;
+
+    $rate = get_ltc_usd_rate_from_gdax();
+    if($rate != 0.0)
+        return $rate;
+
+    $rate = get_ltc_usd_rate_from_bitstamp_net();
+    if($rate != 0.0)
+        return $rate;
+
+    $rate = get_ltc_usd_rate_from_fiat2ltc_com();
     if($rate != 0.0)
         return $rate;
 }
